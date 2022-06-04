@@ -89,7 +89,7 @@ We would like to express our deep gratitude to all the open-source projects used
 ## Get Help
 
 1. Submit an [issue](https://github.com/apache/dolphinscheduler/issues/new/choose)
-2. [Join our slack](https://join.slack.com/t/asf-dolphinscheduler/shared_invite/zt-omtdhuio-_JISsxYhiVsltmC5h38yfw) and send your question to channel `#troubleshooting`
+2. [Join our slack](https://s.apache.org/dolphinscheduler-slack) and send your question to channel `#troubleshooting`
 
 ## Community
 
