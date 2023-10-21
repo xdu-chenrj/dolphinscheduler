@@ -37,8 +37,9 @@ type IDataBase =
   | 'DATABEND'
   | 'SNOWFLAKE'
   | 'HANA'
-  | 'ZEPPELIN'
   | 'DORIS'
+  | 'KYUUBI'
+  | 'ZEPPELIN'
   | 'SAGEMAKER'
 
 type IDataBaseLabel =
@@ -59,6 +60,7 @@ type IDataBaseLabel =
   | 'DAMENG'
   | 'OCEANBASE'
   | 'SSH'
+  | 'KYUUBI'
   | 'ZEPPELIN'
   | 'SAGEMAKER'
 
