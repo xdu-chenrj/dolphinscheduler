@@ -71,7 +71,7 @@ public class K8sDataSourceProcessor implements DataSourceProcessor {
     }
 
     @Override
-    public ConnectionParam createConnectionParams(BaseDataSourceParamDTO datasourceParam) {
+    public K8sConnectionParam createConnectionParams(BaseDataSourceParamDTO datasourceParam) {
         K8sDataSourceParamDTO k8sDataSourceParam = (K8sDataSourceParamDTO) datasourceParam;
         K8sConnectionParam k8sConnectionParam = new K8sConnectionParam();
         k8sConnectionParam.setKubeConfig(k8sDataSourceParam.getKubeConfig());

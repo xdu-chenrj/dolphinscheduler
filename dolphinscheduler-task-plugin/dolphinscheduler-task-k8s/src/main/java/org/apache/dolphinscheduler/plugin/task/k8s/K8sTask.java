@@ -55,9 +55,9 @@ public class K8sTask extends AbstractK8sTask {
     /**
      * task parameters
      */
-    private final K8sTaskParameters k8sTaskParameters;
+    private K8sTaskParameters k8sTaskParameters;
 
-    private final K8sTaskExecutionContext k8sTaskExecutionContext;
+    private K8sTaskExecutionContext k8sTaskExecutionContext;
 
     private K8sConnectionParam k8sConnectionParam;
 
@@ -67,8 +67,12 @@ public class K8sTask extends AbstractK8sTask {
     public K8sTask(TaskExecutionContext taskRequest) {
         super(taskRequest);
         this.taskExecutionContext = taskRequest;
-        this.k8sTaskParameters = JSONUtils.parseObject(taskExecutionContext.getTaskParams(), K8sTaskParameters.class);
-        log.info("Initialize k8s task parameters {}", JSONUtils.toPrettyJsonString(k8sTaskParameters));
+    }
+
+    @Override
+    public void init() {
+        String taskParams = taskExecutionContext.getTaskParams();
+        k8sTaskParameters = JSONUtils.parseObject(taskParams, K8sTaskParameters.class);
         if (k8sTaskParameters == null || !k8sTaskParameters.checkParameters()) {
             throw new TaskException("K8S task params is not valid");
         }
@@ -79,9 +83,10 @@ public class K8sTask extends AbstractK8sTask {
         k8sConnectionParam =
                 (K8sConnectionParam) DataSourceUtils.buildConnectionParams(DbType.valueOf(k8sTaskParameters.getType()),
                         k8sTaskExecutionContext.getConnectionParams());
-        final String kubeConfig = k8sConnectionParam.getKubeConfig();
-        this.k8sTaskParameters.setNamespace(k8sConnectionParam.getNamespace());
-        this.k8sTaskParameters.setKubeConfig(kubeConfig);
+        String kubeConfig = k8sConnectionParam.getKubeConfig();
+        k8sTaskParameters.setNamespace(k8sConnectionParam.getNamespace());
+        k8sTaskParameters.setKubeConfig(kubeConfig);
+        log.info("Initialize k8s task params:{}", JSONUtils.toPrettyJsonString(k8sTaskParameters));
     }
 
     @Override
