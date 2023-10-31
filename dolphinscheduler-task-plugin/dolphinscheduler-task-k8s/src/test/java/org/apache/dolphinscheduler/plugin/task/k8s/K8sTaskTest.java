@@ -34,11 +34,11 @@ import org.apache.dolphinscheduler.plugin.task.api.model.Property;
 import org.apache.dolphinscheduler.plugin.task.api.parameters.K8sTaskParameters;
 import org.apache.dolphinscheduler.plugin.task.api.parameters.resource.ResourceParametersHelper;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ArrayList;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -75,8 +75,10 @@ public class K8sTaskTest {
     private final String type = "K8S";
 
     private final Map<String, Property> prepareParamsMap = new HashMap<String, Property>() {
+
         {
             put(DAY, new Property() {
+
                 {
                     setProp(DAY);
                     setValue(date);
