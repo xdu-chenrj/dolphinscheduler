@@ -34,7 +34,7 @@ public class K8sTaskMainParameters {
     private String args;
     private String pullSecret;
     private String namespaceName;
-    private String clusterName;
+    // private String clusterName;
     private String imagePullPolicy;
     private double minCpuCores;
     private double minMemorySpace;

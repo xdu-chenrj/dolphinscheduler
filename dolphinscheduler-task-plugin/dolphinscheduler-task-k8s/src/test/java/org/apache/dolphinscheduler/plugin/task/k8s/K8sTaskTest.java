@@ -18,14 +18,13 @@
 package org.apache.dolphinscheduler.plugin.task.k8s;
 
 import static org.apache.dolphinscheduler.plugin.task.api.utils.VarPoolUtils.VAR_DELIMITER;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import org.apache.dolphinscheduler.common.utils.JSONUtils;
 import org.apache.dolphinscheduler.plugin.datasource.api.utils.DataSourceUtils;
 import org.apache.dolphinscheduler.plugin.datasource.k8s.param.K8sConnectionParam;
-import org.apache.dolphinscheduler.plugin.datasource.sagemaker.param.SagemakerConnectionParam;
-import org.apache.dolphinscheduler.plugin.datasource.zeppelin.param.ZeppelinConnectionParam;
-import org.apache.dolphinscheduler.plugin.task.api.K8sTaskExecutionContext;
 import org.apache.dolphinscheduler.plugin.task.api.TaskExecutionContext;
 import org.apache.dolphinscheduler.plugin.task.api.enums.DataType;
 import org.apache.dolphinscheduler.plugin.task.api.enums.Direct;
@@ -33,24 +32,22 @@ import org.apache.dolphinscheduler.plugin.task.api.model.Label;
 import org.apache.dolphinscheduler.plugin.task.api.model.NodeSelectorExpression;
 import org.apache.dolphinscheduler.plugin.task.api.model.Property;
 import org.apache.dolphinscheduler.plugin.task.api.parameters.K8sTaskParameters;
+import org.apache.dolphinscheduler.plugin.task.api.parameters.resource.ResourceParametersHelper;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 
-import org.apache.dolphinscheduler.plugin.task.api.parameters.resource.ResourceParametersHelper;
-import org.apache.zeppelin.client.ParagraphResult;
-import org.apache.zeppelin.client.ZeppelinClient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import io.fabric8.kubernetes.api.model.NodeSelectorRequirement;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+
+import io.fabric8.kubernetes.api.model.NodeSelectorRequirement;
 
 public class K8sTaskTest {
 
@@ -62,7 +59,7 @@ public class K8sTaskTest {
 
     private final String pullSecret = "ds-secret";
 
-    private final String namespace = "name";
+    private final String namespace = "namespace";
 
     private final double minCpuCores = 2;
 
@@ -77,6 +74,17 @@ public class K8sTaskTest {
     private final String kubeConfig = "{}";
     private final String type = "K8S";
 
+    private final Map<String, Property> prepareParamsMap = new HashMap<String, Property>() {
+        {
+            put(DAY, new Property() {
+                {
+                    setProp(DAY);
+                    setValue(date);
+                }
+            });
+        }
+    };
+
     private final int datasource = 0;
     private final List<Label> labels = Arrays.asList(new Label("test", "1234"));
     private final List<NodeSelectorExpression> nodeSelectorExpressions =
@@ -86,58 +94,26 @@ public class K8sTaskTest {
 
     @BeforeEach
     public void before() {
-//        k8sTaskParameters = new K8sTaskParameters();
-//        k8sTaskParameters.setImage(image);
-//        k8sTaskParameters.setImagePullPolicy(imagePullPolicy);
-//        k8sTaskParameters.setNamespace(namespace);
-//        k8sTaskParameters.setMinCpuCores(minCpuCores);
-//        k8sTaskParameters.setMinMemorySpace(minMemorySpace);
-//        k8sTaskParameters.setCommand(command);
-//        k8sTaskParameters.setArgs(args);
-//        k8sTaskParameters.setCustomizedLabels(labels);
-//        k8sTaskParameters.setNodeSelectors(nodeSelectorExpressions);
-//        k8sTaskParameters.setLocalParams(new ArrayList<>());
-//        k8sTaskParameters.setPullSecret(pullSecret);
-//        k8sTaskParameters.setType(type);
-//        k8sTaskParameters.setKubeConfig(kubeConfig);
-//        k8sTaskParameters.setDatasource(datasource);
-//
-//        TaskExecutionContext taskRequest = new TaskExecutionContext();
-//        taskRequest.setTaskInstanceId(taskInstanceId);
-//        taskRequest.setTaskName(taskName);
-//        taskRequest.setTaskParams(JSONUtils.toJsonString(k8sTaskParameters));
-//        taskRequest.setResourceParametersHelper(resourceParametersHelper);
-//        Property property = new Property();
-//        property.setProp(DAY);
-//        property.setDirect(Direct.IN);
-//        property.setType(DataType.VARCHAR);
-//        property.setValue(date);
-//        Map<String, Property> paramsMap = new HashMap<>();
-//        paramsMap.put(DAY, property);
-//        taskRequest.setParamsMap(paramsMap);
-//
-//        Map<String, Property> prepareParamsMap = new HashMap<>();
-//        Property property1 = new Property();
-//        property1.setProp("day");
-//        property1.setValue("20220507");
-//        prepareParamsMap.put("day", property1);
-//        taskRequest.setPrepareParamsMap(prepareParamsMap);
-
-//        k8sTask = new K8sTask(taskRequest);
 
         String k8sTaskParameters = buildK8sTaskParameters();
         TaskExecutionContext taskExecutionContext = mock(TaskExecutionContext.class);
         ResourceParametersHelper resourceParametersHelper = mock(ResourceParametersHelper.class);
         K8sConnectionParam k8sConnectionParam = mock(K8sConnectionParam.class);
         when(taskExecutionContext.getTaskParams()).thenReturn(k8sTaskParameters);
+        when(k8sConnectionParam.getNamespace()).thenReturn(namespace);
+        when(k8sConnectionParam.getKubeConfig()).thenReturn(kubeConfig);
+        when(taskExecutionContext.getPrepareParamsMap()).thenReturn(prepareParamsMap);
         when(taskExecutionContext.getResourceParametersHelper()).thenReturn(resourceParametersHelper);
         dataSourceUtilsStaticMock = Mockito.mockStatic(DataSourceUtils.class);
         dataSourceUtilsStaticMock.when(() -> DataSourceUtils.buildConnectionParams(Mockito.any(), Mockito.any()))
                 .thenReturn(k8sConnectionParam);
-        k8sConnectionParam.setNamespace(namespace);
         k8sTask = spy(new K8sTask(taskExecutionContext));
-
         k8sTask.init();
+    }
+
+    @AfterEach
+    public void afterEach() {
+        dataSourceUtilsStaticMock.close();
     }
 
     private String buildK8sTaskParameters() {
@@ -154,23 +130,15 @@ public class K8sTaskTest {
         k8sTaskParameters.setLocalParams(new ArrayList<>());
         k8sTaskParameters.setPullSecret(pullSecret);
         k8sTaskParameters.setType(type);
-//        k8sTaskParameters.setKubeConfig(kubeConfig);
-//        k8sTaskParameters.setDatasource(datasource);
+        k8sTaskParameters.setKubeConfig(kubeConfig);
+        k8sTaskParameters.setDatasource(datasource);
         return JSONUtils.toJsonString(k8sTaskParameters);
     }
 
-
-    @AfterEach
-    public void afterEach() {
-        dataSourceUtilsStaticMock.close();
-    }
-
-    // 连个namespace对不上，原因在于构建Parameters的出现了问题
-    // 还有一个问题待解决, namespace 的数据类型
     @Test
     public void testBuildCommandNormal() {
         String expectedStr =
-                "{\"image\":\"ds-dev\",\"command\":\"[\\\"/bin/bash\\\", \\\"-c\\\"]\",\"args\":\"[\\\"echo hello world\\\"]\",\"pullSecret\":\"ds-secret\",\"namespaceName\":\"default\",\"clusterName\":\"lab\",\"imagePullPolicy\":\"IfNotPresent\",\"minCpuCores\":2.0,\"minMemorySpace\":10.0,\"paramsMap\":{\"day\":\"20220507\"},\"labelMap\":{\"test\":\"1234\"},\"nodeSelectorRequirements\":[{\"key\":\"node-label\",\"operator\":\"In\",\"values\":[\"1234\",\"12345\"]}]}";
+                "{\"image\":\"ds-dev\",\"command\":\"[\\\"/bin/bash\\\", \\\"-c\\\"]\",\"args\":\"[\\\"echo hello world\\\"]\",\"pullSecret\":\"ds-secret\",\"namespaceName\":\"namespace\",\"imagePullPolicy\":\"IfNotPresent\",\"minCpuCores\":2.0,\"minMemorySpace\":10.0,\"paramsMap\":{\"day\":\"20220507\"},\"labelMap\":{\"test\":\"1234\"},\"nodeSelectorRequirements\":[{\"key\":\"node-label\",\"operator\":\"In\",\"values\":[\"1234\",\"12345\"]}]}";
         String commandStr = k8sTask.buildCommand();
         Assertions.assertEquals(expectedStr, commandStr);
     }
@@ -178,7 +146,7 @@ public class K8sTaskTest {
     @Test
     public void testGetParametersNormal() {
         String expectedStr =
-                "K8sTaskParameters(image=ds-dev, namespace=name, command=[\"/bin/bash\", \"-c\"], args=[\"echo hello world\"], pullSecret=ds-secret, imagePullPolicy=IfNotPresent, minCpuCores=2.0, minMemorySpace=10.0, customizedLabels=[Label(label=test, value=1234)], nodeSelectors=[NodeSelectorExpression(key=node-label, operator=In, values=1234,12345)])";
+                "K8sTaskParameters(image=ds-dev, namespace=namespace, command=[\"/bin/bash\", \"-c\"], args=[\"echo hello world\"], pullSecret=ds-secret, imagePullPolicy=IfNotPresent, minCpuCores=2.0, minMemorySpace=10.0, customizedLabels=[Label(label=test, value=1234)], nodeSelectors=[NodeSelectorExpression(key=node-label, operator=In, values=1234,12345)], kubeConfig={}, datasource=0, type=K8S)";
         String result = k8sTask.getParameters().toString();
         Assertions.assertEquals(expectedStr, result);
     }

@@ -104,11 +104,10 @@ public class K8sTask extends AbstractK8sTask {
         K8sTaskMainParameters k8sTaskMainParameters = new K8sTaskMainParameters();
         Map<String, Property> paramsMap = taskExecutionContext.getPrepareParamsMap();
         String namespaceName = k8sTaskParameters.getNamespace();
-        String clusterName = "cluster";
         k8sTaskMainParameters.setImage(k8sTaskParameters.getImage());
         k8sTaskMainParameters.setPullSecret(k8sTaskParameters.getPullSecret());
         k8sTaskMainParameters.setNamespaceName(namespaceName);
-        k8sTaskMainParameters.setClusterName(clusterName);
+        // k8sTaskMainParameters.setClusterName("");
         k8sTaskMainParameters.setMinCpuCores(k8sTaskParameters.getMinCpuCores());
         k8sTaskMainParameters.setMinMemorySpace(k8sTaskParameters.getMinMemorySpace());
         k8sTaskMainParameters.setParamsMap(ParameterUtils.convert(paramsMap));
