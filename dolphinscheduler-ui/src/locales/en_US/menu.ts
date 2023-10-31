@@ -19,7 +19,7 @@ export default {
   home: 'Home',
   project: 'Project',
   resources: 'Resources',
-  datasource: 'Datasource',
+  datasource: 'Connectivity Center',
   monitor: 'Monitor',
   security: 'Security',
   project_overview: 'Project Overview',
