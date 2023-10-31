@@ -37,9 +37,11 @@ type IDataBase =
   | 'DATABEND'
   | 'SNOWFLAKE'
   | 'HANA'
-  | 'ZEPPELIN'
   | 'DORIS'
+  | 'KYUUBI'
+  | 'ZEPPELIN'
   | 'SAGEMAKER'
+  | 'K8S'
 
 type IDataBaseLabel =
   | 'MYSQL'
@@ -59,8 +61,10 @@ type IDataBaseLabel =
   | 'DAMENG'
   | 'OCEANBASE'
   | 'SSH'
+  | 'KYUUBI'
   | 'ZEPPELIN'
   | 'SAGEMAKER'
+  | 'K8S'
 
 interface IDataSource {
   id?: number
@@ -83,6 +87,8 @@ interface IDataSource {
   other?: object
   endpoint?: string
   restEndpoint?: string
+  kubeConfig?: string
+  namespace?: string
   MSIClientId?: string
   dbUser?: string
   compatibleMode?: string

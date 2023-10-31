@@ -25,11 +25,7 @@ import lombok.Data;
 @Data
 public class SagemakerDataSourceParamDTO extends BaseDataSourceParamDTO {
 
-    protected String accessKey;
-
-    protected String secretAccessKey;
-
-    protected String region;
+    protected String awsRegion;
 
     @Override
     public DbType getType() {

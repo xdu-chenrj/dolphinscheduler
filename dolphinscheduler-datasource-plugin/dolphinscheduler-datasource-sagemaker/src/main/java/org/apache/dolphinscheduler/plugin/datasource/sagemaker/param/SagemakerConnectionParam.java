@@ -27,9 +27,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SagemakerConnectionParam implements ConnectionParam {
 
-    protected String accessKey;
+    protected String userName;
 
-    protected String secretAccessKey;
+    protected String password;
 
-    protected String region;
+    protected String awsRegion;
 }
