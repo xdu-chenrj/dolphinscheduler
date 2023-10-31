@@ -107,7 +107,6 @@ public class K8sTask extends AbstractK8sTask {
         k8sTaskMainParameters.setImage(k8sTaskParameters.getImage());
         k8sTaskMainParameters.setPullSecret(k8sTaskParameters.getPullSecret());
         k8sTaskMainParameters.setNamespaceName(namespaceName);
-        // k8sTaskMainParameters.setClusterName("");
         k8sTaskMainParameters.setMinCpuCores(k8sTaskParameters.getMinCpuCores());
         k8sTaskMainParameters.setMinMemorySpace(k8sTaskParameters.getMinMemorySpace());
         k8sTaskMainParameters.setParamsMap(ParameterUtils.convert(paramsMap));
