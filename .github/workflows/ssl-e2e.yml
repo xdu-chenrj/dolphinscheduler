@@ -129,6 +129,7 @@ jobs:
     timeout-minutes: 30
     strategy:
       matrix:
+        case:
         - name: SslShellTaskE2ETest
           class: org.apache.dolphinscheduler.e2e.cases.ssl.SslShellTaskE2ETest
     env:
