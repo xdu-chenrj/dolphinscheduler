@@ -34,7 +34,7 @@ permissions:
 
 jobs:
   paths-filter:
-    name: E2E-Path-Filter
+    name: SSL-E2E-Path-Filter
     runs-on: ubuntu-latest
     outputs:
       not-ignore: ${{ steps.filter.outputs.not-ignore }}
@@ -47,7 +47,7 @@ jobs:
             not-ignore:
               - '!(docs/**)'
   build:
-    name: E2E-Build
+    name: SSL-E2E-Build
     needs: paths-filter
     if: ${{ (needs.paths-filter.outputs.not-ignore == 'true') || (github.event_name == 'push') }}
     runs-on: ubuntu-latest
@@ -123,7 +123,7 @@ jobs:
           path: /tmp/alert-server-image.tar
           retention-days: 1
   e2e:
-    name: ${{ matrix.case.name }}
+    name: ssl-${{ matrix.case.name }}
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -176,7 +176,7 @@ jobs:
           path: ${{ env.RECORDING_PATH }}
           retention-days: 1
   result:
-    name: E2E
+    name: ssl-E2E
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: [ e2e, paths-filter ]
