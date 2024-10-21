@@ -85,11 +85,11 @@ jobs:
           -Dmaven.test.skip=true \
           -Dspotless.skip=true \
           -Pdocker,staging -Ddocker.tag=ci
-      - name: Export Docker Imagesa
+      - name: Export Docker Images
         run: |
           components=("master" "worker" "api" "tools" "alert-server")
                    for component in "${components[@]}"; do
-                     docker save apache/dolphinscheduler-${component}-server:ci -o /tmp/${component}-image.tar \
+                     docker save apache/dolphinscheduler-${component}:ci -o /tmp/${component}-image.tar \
                      && du -sh /tmp/${component}-image.tar
                    done
       - uses: actions/upload-artifact@v4
