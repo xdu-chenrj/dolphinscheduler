@@ -122,7 +122,7 @@ jobs:
           name: standalone-image-e2e
           path: /tmp/alert-server-image.tar
           retention-days: 1
-  e2e:
+  ssl-e2e:
     name: ssl-${{ matrix.case.name }}
     needs: build
     runs-on: ubuntu-latest
@@ -179,7 +179,7 @@ jobs:
     name: ssl-E2E
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: [ e2e, paths-filter ]
+    needs: [ ssl-e2e, paths-filter ]
     if: always()
     steps:
       - name: Status
