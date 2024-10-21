@@ -81,13 +81,13 @@ jobs:
           restore-keys: ${{ runner.os }}-maven-
       - name: Build Image
         run: |
-          ./mvnw -B clean package \
+          ./mvnw -B clean package -o \
           -Dmaven.test.skip=true \
           -Dspotless.skip=true \
           -Pdocker,staging -Ddocker.tag=ci
       - name: Export Docker Images
         run: |
-          components=("master" "worker" "api" "tools" "alert-server")
+          components=("master" "worker" "api" "alert-server")
                    for component in "${components[@]}"; do
                      docker save apache/dolphinscheduler-${component}:ci -o /tmp/${component}-image.tar \
                      && du -sh /tmp/${component}-image.tar
@@ -109,12 +109,6 @@ jobs:
         with:
           name: api-image-e2e
           path: /tmp/api-image.tar
-          retention-days: 1
-      - uses: actions/upload-artifact@v4
-        name: Upload tool Docker Images
-        with:
-          name: tool-image-e2e
-          path: /tmp/tools-image.tar
           retention-days: 1
       - uses: actions/upload-artifact@v4
         name: Upload alert-server Docker Images
@@ -173,12 +167,6 @@ jobs:
           path: /tmp/api-image.tar
           retention-days: 1
       - uses: actions/download-artifact@v4
-        name: download tool Docker Images
-        with:
-          name: tool-image-e2e
-          path: /tmp/tools-image.tar
-          retention-days: 1
-      - uses: actions/download-artifact@v4
         name: download alert-server Docker Images
         with:
           name: alert-server-image-e2e
@@ -187,7 +175,7 @@ jobs:
 
       - name: Load Docker Images
         run: |
-          components=("master" "worker" "api" "tools" "alert-server")
+          components=("master" "worker" "api" "alert-server")
           for component in "${components[@]}"; do
             docker load -i /tmp/${component}-image.tar
           done
