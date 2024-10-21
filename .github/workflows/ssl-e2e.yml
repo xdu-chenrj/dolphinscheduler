@@ -46,7 +46,7 @@ jobs:
           filters: |
             not-ignore:
               - '!(docs/**)'
-  ssl-build:
+  build:
     name: SSL-E2E-Build
     needs: paths-filter
     if: ${{ (needs.paths-filter.outputs.not-ignore == 'true') || (github.event_name == 'push') }}
@@ -124,7 +124,7 @@ jobs:
           retention-days: 1
   ssl-e2e:
     name: ssl-${{ matrix.case.name }}
-    needs: ssl-build
+    needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
