@@ -87,13 +87,40 @@ jobs:
           -Pdocker,staging -Ddocker.tag=ci
       - name: Export Docker Images
         run: |
-          docker save apache/dolphinscheduler-standalone-server:ci -o /tmp/standalone-image.tar \
-          && du -sh /tmp/standalone-image.tar
+          components=("master" "worker" "api" "tools" "alert-server")
+                   for component in "${components[@]}"; do
+                     docker save apache/dolphinscheduler-${component}-server:ci -o /tmp/${component}-image.tar \
+                     && du -sh /tmp/standalone-image.tar
+                   done
       - uses: actions/upload-artifact@v4
-        name: Upload Docker Images
+        name: Upload master Docker Images
         with:
           name: standalone-image-e2e
-          path: /tmp/standalone-image.tar
+          path: /tmp/master-image.tar
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        name: Upload worker Docker Images
+        with:
+          name: standalone-image-e2e
+          path: /tmp/worker-image.tar
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        name: Upload api Docker Images
+        with:
+          name: standalone-image-e2e
+          path: /tmp/api-image.tar
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        name: Upload tool Docker Images
+        with:
+          name: standalone-image-e2e
+          path: /tmp/tool-image.tar
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        name: Upload alert-server Docker Images
+        with:
+          name: standalone-image-e2e
+          path: /tmp/alert-server-image.tar
           retention-days: 1
   e2e:
     name: ${{ matrix.case.name }}
@@ -102,47 +129,8 @@ jobs:
     timeout-minutes: 30
     strategy:
       matrix:
-        case:
-          - name: TenantE2ETest
-            class: org.apache.dolphinscheduler.e2e.cases.TenantE2ETest
-          - name: UserE2ETest
-            class: org.apache.dolphinscheduler.e2e.cases.UserE2ETest
-          - name: WorkerGroupE2ETest
-            class: org.apache.dolphinscheduler.e2e.cases.WorkerGroupE2ETest
-          - name: ProjectE2ETest
-            class: org.apache.dolphinscheduler.e2e.cases.ProjectE2ETest
-          - name: QueueE2ETest
-            class: org.apache.dolphinscheduler.e2e.cases.QueueE2ETest
-          - name: EnvironmentE2ETest
-            class: org.apache.dolphinscheduler.e2e.cases.EnvironmentE2ETest
-          - name: ClusterE2ETest
-            class: org.apache.dolphinscheduler.e2e.cases.ClusterE2ETest
-          - name: TokenE2ETest
-            class: org.apache.dolphinscheduler.e2e.cases.TokenE2ETest
-          - name: WorkflowE2ETest
-            class: org.apache.dolphinscheduler.e2e.cases.WorkflowE2ETest
-          - name: WorkflowHttpTaskE2ETest
-            class: org.apache.dolphinscheduler.e2e.cases.WorkflowHttpTaskE2ETest
-          - name: WorkflowJavaTaskE2ETest
-            class: org.apache.dolphinscheduler.e2e.cases.WorkflowJavaTaskE2ETest
-#          - name: WorkflowForSwitch
-#            class: org.apache.dolphinscheduler.e2e.cases.WorkflowSwitchE2ETest
-          - name: FileManageE2ETest
-            class: org.apache.dolphinscheduler.e2e.cases.FileManageE2ETest
-          - name: MysqlDataSourceE2ETest
-            class: org.apache.dolphinscheduler.e2e.cases.MysqlDataSourceE2ETest
-          - name: ClickhouseDataSourceE2ETest
-            class: org.apache.dolphinscheduler.e2e.cases.ClickhouseDataSourceE2ETest
-          - name: PostgresDataSourceE2ETest
-            class: org.apache.dolphinscheduler.e2e.cases.PostgresDataSourceE2ETest
-          - name: ShellTaskE2ETest
-            class: org.apache.dolphinscheduler.e2e.cases.tasks.ShellTaskE2ETest
-          - name: PythonTaskE2ETest
-            class: org.apache.dolphinscheduler.e2e.cases.tasks.PythonTaskE2ETest
-          - name: SqlServerDataSourceE2ETest
-            class: org.apache.dolphinscheduler.e2e.cases.SqlServerDataSourceE2ETest
-          - name: HiveDataSourceE2ETest
-            class: org.apache.dolphinscheduler.e2e.cases.HiveDataSourceE2ETest
+        - name: SslShellTaskE2ETest
+          class: org.apache.dolphinscheduler.e2e.cases.ssl.SslShellTaskE2ETest
     env:
       RECORDING_PATH: /tmp/recording-${{ matrix.case.name }}
     steps:
@@ -171,7 +159,10 @@ jobs:
           path: /tmp
       - name: Load Docker Images
         run: |
-          docker load -i /tmp/standalone-image.tar
+          components=("master" "worker" "api" "tools" "alert-server")
+          for component in "${components[@]}"; do
+            docker load -i /tmp/${component}-image.tar
+          done
       - name: Run Test
         run: |
           ./mvnw -B -f dolphinscheduler-e2e/pom.xml -am \
