@@ -171,6 +171,7 @@ jobs:
           name: api-image-e2e
           path: /tmp/api
           retention-days: 1
+          overwrite: true
       - uses: actions/download-artifact@v4
         name: download tools Docker Images
         with:
