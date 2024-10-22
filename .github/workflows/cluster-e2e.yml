@@ -130,8 +130,8 @@ jobs:
     strategy:
       matrix:
         case:
-        - name: ClusterShellTaskE2ETest
-          class: org.apache.dolphinscheduler.e2e.cases.cluster.ClusterShellTaskE2ETest
+          - name: ClusterShellTaskE2ETest
+            class: org.apache.dolphinscheduler.e2e.cases.cluster.ClusterShellTaskE2ETest
     env:
       RECORDING_PATH: /tmp/recording-${{ matrix.case.name }}
     steps:
@@ -154,33 +154,9 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}-e2e
           restore-keys: ${{ runner.os }}-maven-
       - uses: actions/download-artifact@v4
-        name: download master Docker Images
+        name: download cluster Docker Images
         with:
-          name: master-image-e2e
-          path: /tmp
-          retention-days: 1
-      - uses: actions/download-artifact@v4
-        name: download worker Docker Images
-        with:
-          name: worker-image-e2e
-          path: /tmp
-          retention-days: 1
-      - uses: actions/upload-artifact@v4
-        name: download api Docker Images
-        with:
-          name: api-image-e2e
-          path: /tmp
-          retention-days: 1
-      - uses: actions/download-artifact@v4
-        name: download tools Docker Images
-        with:
-          name: tools-image-e2e
-          path: /tmp
-          retention-days: 1
-      - uses: actions/download-artifact@v4
-        name: download alert-server Docker Images
-        with:
-          name: alert-server-image-e2e
+          name: cluster-image-e2e
           path: /tmp
           retention-days: 1
       - name: Load Docker Images
