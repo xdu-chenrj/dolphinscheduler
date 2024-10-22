@@ -23,10 +23,10 @@ on:
       - '[0-9]+.[0-9]+.[0-9]+-prepare'
       - '[0-9]+.[0-9]+.[0-9]+-release'
 
-name: SSL-E2E
+name: CLUSTER-E2E
 
 concurrency:
-  group: ssl-e2e-${{ github.event.pull_request.number || github.ref }}
+  group: cluster-e2e-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -34,7 +34,7 @@ permissions:
 
 jobs:
   paths-filter:
-    name: SSL-E2E-Path-Filter
+    name: CLUSTER-E2E-Path-Filter
     runs-on: ubuntu-latest
     outputs:
       not-ignore: ${{ steps.filter.outputs.not-ignore }}
@@ -47,7 +47,7 @@ jobs:
             not-ignore:
               - '!(docs/**)'
   build:
-    name: SSL-E2E-Build
+    name: CLUSTER-E2E-Build
     needs: paths-filter
     if: ${{ (needs.paths-filter.outputs.not-ignore == 'true') || (github.event_name == 'push') }}
     runs-on: ubuntu-latest
@@ -122,16 +122,16 @@ jobs:
           name: alert-server-image-e2e
           path: /tmp/alert-server-image.tar
           retention-days: 1
-  ssl-e2e:
-    name: ssl-${{ matrix.case.name }}
+  cluster-e2e:
+    name: cluster-${{ matrix.case.name }}
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
       matrix:
         case:
-        - name: SslShellTaskE2ETest
-          class: org.apache.dolphinscheduler.e2e.cases.ssl.SslShellTaskE2ETest
+        - name: ClusterShellTaskE2ETest
+          class: org.apache.dolphinscheduler.e2e.cases.cluster.ClusterShellTaskE2ETest
     env:
       RECORDING_PATH: /tmp/recording-${{ matrix.case.name }}
     steps:
@@ -158,31 +158,31 @@ jobs:
         name: download master Docker Images
         with:
           name: master-image-e2e
-          path: /tmp/master-image.tar
+          path: /tmp
           retention-days: 1
       - uses: actions/download-artifact@v4
         name: download worker Docker Images
         with:
           name: worker-image-e2e
-          path: /tmp/worker-image.tar
+          path: /tmp
           retention-days: 1
       - uses: actions/upload-artifact@v4
         name: download api Docker Images
         with:
           name: api-image-e2e
-          path: /tmp/api-image.tar
+          path: /tmp
           retention-days: 1
       - uses: actions/download-artifact@v4
         name: download tools Docker Images
         with:
           name: tool-image-e2e
-          path: /tmp/tools-image.tar
+          path: /tmp
           retention-days: 1
       - uses: actions/download-artifact@v4
         name: download alert-server Docker Images
         with:
           name: alert-server-image-e2e
-          path: /tmp/alert-server-image.tar
+          path: /tmp
           retention-days: 1
 
       - name: Load Docker Images
@@ -204,19 +204,19 @@ jobs:
           path: ${{ env.RECORDING_PATH }}
           retention-days: 1
   result:
-    name: SSL-E2E
+    name: CLUSTER-E2E
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: [ ssl-e2e, paths-filter ]
+    needs: [ cluster-e2e, paths-filter ]
     if: always()
     steps:
       - name: Status
         run: |
           if [[ ${{ needs.paths-filter.outputs.not-ignore }} == 'false' && ${{ github.event_name }} == 'pull_request' ]]; then
-            echo "Skip SSL-E2E!"
+            echo "Skip CLUSTER-E2E!"
             exit 0
           fi
           if [[ ${{ needs.e2e.result }} != 'success' ]]; then
-            echo "SSL-E2E Failed!"
+            echo "CLUSTER-E2E Failed!"
             exit -1
           fi
