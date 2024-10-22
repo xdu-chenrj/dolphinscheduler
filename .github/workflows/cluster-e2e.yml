@@ -60,7 +60,7 @@ jobs:
         uses: ./.github/actions/maximize-build-space
         with:
           root-reserve-mb: 40720
-          temp-reserve-mb: 20240
+          temp-reserve-mb: 10240
           remove-dotnet: 'true'
           remove-android: 'true'
           remove-haskell: 'true'
