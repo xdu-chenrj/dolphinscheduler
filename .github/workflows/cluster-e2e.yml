@@ -130,8 +130,8 @@ jobs:
     strategy:
       matrix:
         case:
-          - name: ClusterShellTaskE2ETest
-            class: org.apache.dolphinscheduler.e2e.cases.cluster.ClusterShellTaskE2ETest
+        - name: ClusterShellTaskE2ETest
+          class: org.apache.dolphinscheduler.e2e.cases.cluster.ClusterShellTaskE2ETest
     env:
       RECORDING_PATH: /tmp/recording-${{ matrix.case.name }}
     steps:
@@ -154,16 +154,40 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}-e2e
           restore-keys: ${{ runner.os }}-maven-
       - uses: actions/download-artifact@v4
-        name: download cluster Docker Images
+        name: download master Docker Images
         with:
-          name: cluster-image-e2e
-          path: /tmp
+          name: master-image-e2e
+          path: /tmp/master
+          retention-days: 1
+      - uses: actions/download-artifact@v4
+        name: download worker Docker Images
+        with:
+          name: worker-image-e2e
+          path: /tmp/worker
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        name: download api Docker Images
+        with:
+          name: api-image-e2e
+          path: /tmp/api
+          retention-days: 1
+      - uses: actions/download-artifact@v4
+        name: download tools Docker Images
+        with:
+          name: tools-image-e2e
+          path: /tmp/tools
+          retention-days: 1
+      - uses: actions/download-artifact@v4
+        name: download alert-server Docker Images
+        with:
+          name: alert-server-image-e2e
+          path: /tmp/alert-server
           retention-days: 1
       - name: Load Docker Images
         run: |
           components=("master" "worker" "api" "tools" "alert-server")
           for component in "${components[@]}"; do
-            docker load -i /tmp/${component}-image.tar
+            docker load -i /tmp/${component}/${component}-image.tar
           done
       - name: Run Test
         run: |
