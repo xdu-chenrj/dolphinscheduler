@@ -51,7 +51,7 @@ jobs:
     needs: paths-filter
     if: ${{ (needs.paths-filter.outputs.not-ignore == 'true') || (github.event_name == 'push') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
         with:
@@ -59,8 +59,8 @@ jobs:
       - name: Maximize runner space
         uses: ./.github/actions/maximize-build-space
         with:
-          root-reserve-mb: 30720
-          temp-reserve-mb: 10240
+          root-reserve-mb: 40720
+          temp-reserve-mb: 20240
           remove-dotnet: 'true'
           remove-android: 'true'
           remove-haskell: 'true'
@@ -130,24 +130,14 @@ jobs:
     strategy:
       matrix:
         case:
-        - name: ClusterShellTaskE2ETest
-          class: org.apache.dolphinscheduler.e2e.cases.cluster.ClusterShellTaskE2ETest
+          - name: ClusterShellTaskE2ETest
+            class: org.apache.dolphinscheduler.e2e.cases.cluster.ClusterShellTaskE2ETest
     env:
       RECORDING_PATH: /tmp/recording-${{ matrix.case.name }}
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: true
-      - name: Maximize runner space
-        uses: ./.github/actions/maximize-build-space
-        with:
-          root-reserve-mb: 30720
-          temp-reserve-mb: 10240
-          remove-dotnet: 'true'
-          remove-android: 'true'
-          remove-haskell: 'true'
-          remove-codeql: 'true'
-          remove-docker-images: 'true'
       - name: Set up JDK 11
         uses: actions/setup-java@v4
         with:
