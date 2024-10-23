@@ -33,9 +33,6 @@ services:
       retries: 120
     networks:
       - e2e
-    deploy:
-      mode: replicated
-      replicas: 1
   dolphinscheduler-api:
     image: apache/dolphinscheduler-standalone-server:ci
     environment:
