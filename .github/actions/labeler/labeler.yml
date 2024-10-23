@@ -63,7 +63,6 @@ e2e:
   - any: ['.github/workflows/e2e.yml']
   - any: ['.github/workflows/api-test.yml']
   - any: ['.github/workflows/e2e-k8s.yml']
-  - any: ['.github/workflows/cluster-e2e.yml']
 
 test:
   - any: ['**/test/**/*']
