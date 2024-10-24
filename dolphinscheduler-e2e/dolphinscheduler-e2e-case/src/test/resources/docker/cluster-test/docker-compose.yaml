@@ -32,7 +32,8 @@ services:
       timeout: 60s
       retries: 120
     networks:
-      - e2e
+      - dolphinscheduler
+
   dolphinscheduler-api:
     image: apache/dolphinscheduler-standalone-server:ci
     environment:
@@ -42,15 +43,16 @@ services:
       - "12345:12345"
     depends_on:
       dolphinscheduler-zookeeper:
-        condition: service_completed_successfully
+        condition: service_healthy
     networks:
-      - e2e
+      - dolphinscheduler
     healthcheck:
       test: [ "CMD", "curl", "http://localhost:12345/dolphinscheduler/actuator/health" ]
       interval: 5s
       timeout: 5s
       retries: 120
     command: [ "/bin/bash", "/opt/dolphinscheduler/api-server/bin/start.sh" ]
+
   dolphinscheduler-master:
     image: apache/dolphinscheduler-standalone-server:ci
     environment:
@@ -61,15 +63,16 @@ services:
       - "5679:5679"
     depends_on:
       dolphinscheduler-zookeeper:
-        condition: service_completed_successfully
+        condition: service_healthy
     networks:
-      - e2e
+      - dolphinscheduler
     healthcheck:
       test: [ "CMD", "curl", "http://localhost:5679/actuator/health" ]
       interval: 5s
       timeout: 5s
       retries: 120
     command: [ "/bin/bash", "/opt/dolphinscheduler/master-server/bin/start.sh" ]
+
   dolphinscheduler-worker:
     image: apache/dolphinscheduler-standalone-server:ci
     environment:
@@ -80,18 +83,24 @@ services:
       - "1235:1235"
     depends_on:
       dolphinscheduler-zookeeper:
-        condition: service_completed_successfully
+        condition: service_healthy
     networks:
-      - e2e
+      - dolphinscheduler
     healthcheck:
       test: [ "CMD", "curl", "http://localhost:1235/actuator/health" ]
       interval: 5s
       timeout: 5s
       retries: 120
     command: [ "/bin/bash", "/opt/dolphinscheduler/worker-server/bin/start.sh" ]
-volumes:
-  dolphinscheduler-zookeeper:
 
 networks:
-  e2e:
+  dolphinscheduler:
     driver: bridge
+
+volumes:
+  dolphinscheduler-postgresql:
+  dolphinscheduler-zookeeper:
+  dolphinscheduler-worker-data:
+  dolphinscheduler-logs:
+  dolphinscheduler-shared-local:
+  dolphinscheduler-resource-local:
