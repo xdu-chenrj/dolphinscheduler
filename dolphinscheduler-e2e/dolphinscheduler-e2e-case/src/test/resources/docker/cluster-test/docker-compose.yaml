@@ -20,16 +20,13 @@ version: "3.8"
 services:
   dolphinscheduler-zookeeper:
     image: bitnami/zookeeper:3.7.1
-    ports:
-      - "2181:2181"
-    profiles: [ "all" ]
     environment:
       ALLOW_ANONYMOUS_LOGIN: "yes"
       ZOO_4LW_COMMANDS_WHITELIST: srvr,ruok,wchs,cons
     volumes:
       - dolphinscheduler-zookeeper:/bitnami/zookeeper
     healthcheck:
-      test: [ "CMD", "bash", "-c", "cat < /dev/null > /dev/tcp/127.0.0.1/2181" ]
+      test: ["CMD", "bash", "-c", "cat < /dev/null > /dev/tcp/127.0.0.1/2181"]
       interval: 5s
       timeout: 60s
       retries: 120
@@ -37,64 +34,92 @@ services:
       - dolphinscheduler
 
   dolphinscheduler-api:
-    image: apache/dolphinscheduler-standalone-server:latest
+    image: apache/dolphinscheduler-standalone-server:ci
     environment:
       MASTER_MAX_CPU_LOAD_AVG: 100
       WORKER_TENANT_AUTO_CREATE: 'true'
     ports:
       - "12345:12345"
-    depends_on:
-      - dolphinscheduler-zookeeper
+      - "25333:25333"
     networks:
       - dolphinscheduler
     healthcheck:
       test: [ "CMD", "curl", "http://localhost:12345/dolphinscheduler/actuator/health" ]
       interval: 5s
       timeout: 5s
-      retries: 120
+      retries: 10
+    depends_on:
+      dolphinscheduler-zookeeper:
+        condition: service_completed_successfully
+    volumes:
+      - dolphinscheduler-logs:/opt/dolphinscheduler/logs
+      - dolphinscheduler-shared-local:/opt/soft
+      - dolphinscheduler-resource-local:/dolphinscheduler
     command: [ "/bin/bash", "/opt/dolphinscheduler/api-server/bin/start.sh" ]
 
-  dolphinscheduler-master:
-    image: apache/dolphinscheduler-standalone-server:latest
+  dolphinscheduler-alert:
+    image: apache/dolphinscheduler-standalone-server:ci
     environment:
       MASTER_MAX_CPU_LOAD_AVG: 100
       WORKER_TENANT_AUTO_CREATE: 'true'
-    ports:
-      - "5678:5678"
-      - "5679:5679"
+    networks:
+      - dolphinscheduler
+    healthcheck:
+      test: [ "CMD", "curl", "http://localhost:50053/actuator/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     depends_on:
-      - dolphinscheduler-zookeeper
+      dolphinscheduler-zookeeper:
+        condition: service_completed_successfully
+    volumes:
+      - dolphinscheduler-logs:/opt/dolphinscheduler/logs
+    command: [ "/bin/bash", "/opt/dolphinscheduler/alert-server/bin/start.sh" ]
+
+  dolphinscheduler-master:
+    image: apache/dolphinscheduler-standalone-server:ci
+    environment:
+      MASTER_MAX_CPU_LOAD_AVG: 100
+      WORKER_TENANT_AUTO_CREATE: 'true'
     networks:
       - dolphinscheduler
     healthcheck:
       test: [ "CMD", "curl", "http://localhost:5679/actuator/health" ]
       interval: 5s
       timeout: 5s
-      retries: 120
+      retries: 10
+    depends_on:
+      dolphinscheduler-zookeeper:
+        condition: service_completed_successfully
+    volumes:
+      - dolphinscheduler-logs:/opt/dolphinscheduler/logs
+      - dolphinscheduler-shared-local:/opt/soft
     command: [ "/bin/bash", "/opt/dolphinscheduler/master-server/bin/start.sh" ]
 
   dolphinscheduler-worker:
-    image: apache/dolphinscheduler-standalone-server:latest
+    image: apache/dolphinscheduler-standalone-server:ci
     environment:
       MASTER_MAX_CPU_LOAD_AVG: 100
       WORKER_TENANT_AUTO_CREATE: 'true'
-    ports:
-      - "1234:1234"
-      - "1235:1235"
-    depends_on:
-      - dolphinscheduler-zookeeper
     networks:
       - dolphinscheduler
     healthcheck:
       test: [ "CMD", "curl", "http://localhost:1235/actuator/health" ]
       interval: 5s
       timeout: 5s
-      retries: 120
+      retries: 10
+    depends_on:
+      dolphinscheduler-zookeeper:
+        condition: service_completed_successfully
+    volumes:
+      - dolphinscheduler-worker-data:/tmp/dolphinscheduler
+      - dolphinscheduler-logs:/opt/dolphinscheduler/logs
+      - dolphinscheduler-shared-local:/opt/soft
+      - dolphinscheduler-resource-local:/dolphinscheduler
     command: [ "/bin/bash", "/opt/dolphinscheduler/worker-server/bin/start.sh" ]
 
 networks:
   dolphinscheduler:
-    driver: bridge
 
 volumes:
   dolphinscheduler-postgresql:
